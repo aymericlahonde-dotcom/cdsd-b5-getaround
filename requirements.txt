@@ -1,0 +1,22 @@
+# Getaround — Bloc 5 (MLOps) — env de travail (notebooks + training)
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+openpyxl
+
+# MLflow (tracking + model registry)
+mlflow
+
+# Dashboard Streamlit (dev local)
+streamlit
+plotly
+
+# API FastAPI (dev local)
+fastapi
+uvicorn[standard]
+pydantic
+
+jupyter
+ipykernel

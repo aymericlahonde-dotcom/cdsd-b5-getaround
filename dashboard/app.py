@@ -7,9 +7,12 @@ problèmes résolus.
 Usage local :
     streamlit run app.py
 
-Déploiement :
-    HuggingFace Spaces (Streamlit) ou autre.
+Déploiement HuggingFace Spaces (Docker) :
+    Push ce dossier vers un Space "Docker" — le Dockerfile s'occupe du reste.
 """
+import urllib.request
+from pathlib import Path
+
 import pandas as pd
 import streamlit as st
 import plotly.express as px
@@ -19,17 +22,25 @@ st.set_page_config(page_title="Getaround — Delay Analysis", layout="wide")
 st.title("🚗 Getaround — Analyse des retards")
 st.caption("Dashboard Streamlit pour aider le Product Manager à choisir un seuil minimum entre 2 locations.")
 
-# ─── Chargement des données ─────────────────────────────────────────────
+
+# ─── Téléchargement / cache du dataset ──────────────────────────────────
+DATASET_URL = "https://full-stack-assets.s3.eu-west-3.amazonaws.com/Deployment/get_around_delay_analysis.xlsx"
+LOCAL_PATH = Path("./get_around_delay_analysis.xlsx")
+
+
 @st.cache_data
 def load_data():
-    return pd.read_excel("../data/get_around_delay_analysis.xlsx")
+    """Télécharge le dataset au 1er run, le met en cache local pour les runs suivants."""
+    if not LOCAL_PATH.exists():
+        urllib.request.urlretrieve(DATASET_URL, str(LOCAL_PATH))
+    return pd.read_excel(LOCAL_PATH)
+
 
 try:
     df = load_data()
     st.success(f"Dataset chargé : {df.shape[0]} locations, {df.shape[1]} colonnes")
-except FileNotFoundError:
-    st.error("Le dataset `data/get_around_delay_analysis.xlsx` n'a pas été trouvé.\n"
-             "Télécharge-le depuis Julie Jedha et place-le dans le dossier `data/`.")
+except Exception as e:
+    st.error(f"Impossible de charger le dataset : {e}")
     st.stop()
 
 # ─── Sidebar — paramètres simulation ────────────────────────────────────

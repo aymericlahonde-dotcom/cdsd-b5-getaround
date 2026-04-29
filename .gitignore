@@ -1,0 +1,60 @@
+# Claude Code (NEVER commit)
+claude.md
+CLAUDE.md
+.claude/
+
+# Internal mission/prompt files
+PROMPT.md
+ENONCE_JEDHA.md
+_legacy/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets/
+credentials.json
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Datasets (use Git LFS for >100MB)
+*.parquet
+*.pkl
+*.h5
+data/raw/
+data/processed/
+
+# Logs
+*.log
+logs/
+
+# MLflow / artifacts
+mlruns/
+mlartifacts/

@@ -6,7 +6,7 @@ colorTo: red
 sdk: docker
 app_port: 8501
 pinned: false
-short_description: Analyse des retards Getaround et simulation de seuil minimum entre locations
+short_description: Analyse retards Getaround et simulation seuil location
 ---
 
 # Getaround Delay Analysis Dashboard

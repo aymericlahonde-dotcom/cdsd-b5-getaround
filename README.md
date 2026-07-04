@@ -4,6 +4,14 @@
 > [RNCP35288 — France Compétences](https://www.francecompetences.fr/recherche/rncp/35288/)
 > **Bloc 5** : Industrialisation d'un algorithme et automatisation des processus — MLOps
 
+## Livrables en ligne
+
+| Livrable | URL |
+|---|---|
+| Dashboard Streamlit (analyse délais) | <https://huggingface.co/spaces/Alh92500/getaround-dashboard> |
+| API FastAPI de pricing (`/predict` + `/docs`) | <https://huggingface.co/spaces/Alh92500/getaround-api> |
+| Repository GitHub | <https://github.com/aymericlahonde-dotcom/cdsd-b5-getaround> |
+
 ## Objectif du projet
 
 Getaround = "Airbnb pour les voitures" — 5M utilisateurs, 20K voitures dans le monde. Le projet a **2 axes** :
@@ -58,20 +66,33 @@ Lien : <https://app.jedha.co/course/project-deployment-ft/getaround-analysis-ft>
 ```
 Bloc_5_Getaround/
 ├── notebooks/
-│   ├── 01_getaround_delay_analysis.ipynb     (axe 1 — analyse délais)
-│   └── 02_getaround_pricing_ml.ipynb         (axe 2 — training ML + MLflow)
-├── dashboard/
-│   ├── app.py                                (app Streamlit)
+│   └── 01_train_pricing.py                   (axe 2 — training ML + tracking MLflow, export model.joblib)
+├── dashboard/                                (axe 1 — analyse des délais)
+│   ├── app.py                                (app Streamlit + questions du Product Manager)
 │   ├── Dockerfile                            (image Streamlit)
+│   ├── README.md                             (card HF Space)
 │   └── requirements.txt
-├── api/
-│   ├── main.py                               (FastAPI app)
+├── api/                                       (axe 2 — API de pricing)
+│   ├── main.py                               (FastAPI app, charge model.joblib en local)
+│   ├── model.joblib                          (pipeline sklearn embarqué, ~28 Mo)
 │   ├── Dockerfile                            (image API)
+│   ├── README.md                             (card HF Space)
 │   └── requirements.txt
-├── data/                                     (à télécharger depuis Julie Jedha, gitignored)
-├── mlruns/                                   (MLflow runs, gitignored)
+├── mlflow-server/                            (image Docker d'un serveur MLflow pour HF Spaces)
+│   ├── Dockerfile
+│   ├── start.sh
+│   └── README.md
+├── data/                                     (datasets Jedha, gitignored)
+├── mlruns/                                   (MLflow runs locaux, gitignored)
+├── requirements.txt                          (env de dev complet)
 └── README.md
 ```
+
+> Note : l'analyse des délais (axe 1) vit directement dans `dashboard/app.py`
+> (chargement de l'Excel + calculs + visualisations Streamlit), il n'y a donc
+> pas de notebook `.ipynb` séparé pour cet axe. Le training ML (axe 2) est un
+> script Python exécutable (`notebooks/01_train_pricing.py`) plutôt qu'un
+> notebook, pour être rejouable en une commande.
 
 ## Comment rejouer le projet en local
 
@@ -79,15 +100,16 @@ Bloc_5_Getaround/
 cd Bloc_5_Getaround
 pip install -r requirements.txt
 
-# 1. Training MLflow
-jupyter lab notebooks/02_getaround_pricing_ml.ipynb
+# 1. Training + tracking MLflow (génère aussi api/model.joblib)
+python notebooks/01_train_pricing.py --n_estimators 200 --max_depth 18
+mlflow ui        # http://127.0.0.1:5000 pour visualiser runs/metrics
 
 # 2. Dashboard Streamlit
 cd dashboard
 streamlit run app.py
 # → http://localhost:8501
 
-# 3. API FastAPI
+# 3. API FastAPI (charge api/model.joblib en local)
 cd ../api
 uvicorn main:app --reload
 # → http://localhost:8000/docs
@@ -95,8 +117,20 @@ uvicorn main:app --reload
 
 ## Déploiement HuggingFace Spaces
 
-Pour le dashboard : créer un Space "Streamlit" et y pousser le contenu de `dashboard/`.
-Pour l'API : créer un Space "Docker" et y pousser le contenu de `api/`.
+Les deux livrables sont déployés en Spaces Docker :
+
+- **Dashboard** : Space Docker à partir de `dashboard/`.
+- **API** : Space Docker à partir de `api/`. Le modèle `model.joblib` est
+  embarqué dans le dossier et chargé en local au démarrage — l'API est
+  autonome, sans dépendance à un serveur MLflow distant.
+
+Push via `huggingface_hub` :
+
+```python
+from huggingface_hub import HfApi
+HfApi().upload_folder(folder_path="api", repo_id="Alh92500/getaround-api",
+                      repo_type="space", token="<HF_TOKEN>")
+```
 
 ## Auteur
 

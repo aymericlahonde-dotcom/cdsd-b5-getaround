@@ -1,4 +1,4 @@
-# Claude Code (NEVER commit)
+# Local tooling / editor config (NEVER commit)
 claude.md
 CLAUDE.md
 .claude/
@@ -6,7 +6,11 @@ CLAUDE.md
 # Internal mission/prompt files
 PROMPT.md
 ENONCE_JEDHA.md
+PREPARE_JURY.md
 _legacy/
+
+# Dev artifact (ancien run_id MLflow, plus utilise par l'API)
+api/.last_run_id
 
 # Python
 __pycache__/

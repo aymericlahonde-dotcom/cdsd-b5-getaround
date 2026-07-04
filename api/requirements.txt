@@ -1,6 +1,9 @@
 fastapi
 uvicorn[standard]
 pydantic
-scikit-learn
+# Versions alignées sur l'environnement d'entraînement pour garantir
+# le dépickle du pipeline sklearn embarqué (api/model.joblib).
+scikit-learn==1.8.0
 numpy
 pandas
+joblib

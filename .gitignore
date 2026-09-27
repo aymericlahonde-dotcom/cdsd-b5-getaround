@@ -1,8 +1,3 @@
-# Local tooling / editor config (NEVER commit)
-claude.md
-CLAUDE.md
-.claude/
-
 # Internal mission/prompt files
 PROMPT.md
 ENONCE_JEDHA.md

@@ -18,6 +18,7 @@ URL en ligne : https://huggingface.co/spaces/Alh92500/getaround-api
 ## Endpoints
 
 - `GET /` - page d'accueil HTML
+- `GET /health` - etat de l'API et du modele charge (type, 13 features)
 - `GET /docs` - Swagger UI
 - `POST /predict` - prediction du prix journalier (1+ voitures)
 
@@ -57,6 +58,12 @@ curl -X POST -H "Content-Type: application/json" \
                   true, true, false, false, true, true, true]]}' \
   https://alh92500-getaround-api.hf.space/predict
 # -> {"prediction":[120.15]}
+```
+
+## Tests
+
+```bash
+cd api && pytest -v     # 4 tests : /health, /predict simple, batch, 422
 ```
 
 ## Rejouer en local

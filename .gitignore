@@ -8,7 +8,6 @@ PROMPT.md
 ENONCE_JEDHA.md
 PREPARE_JURY.md
 DEMO_CHECKLIST.md
-captures/
 _legacy/
 
 # Dev artifact (ancien run_id MLflow, plus utilise par l'API)
@@ -67,3 +66,6 @@ mlartifacts/
 
 # Dataset telecharge au runtime par le dashboard (fallback URL)
 dashboard/*.xlsx
+
+# Captures d ecran (usage perso, regenerees par captures/take_screenshots.py)
+captures/*.png

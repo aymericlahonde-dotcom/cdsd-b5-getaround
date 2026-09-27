@@ -51,6 +51,18 @@ Le dashboard répond aux 4 questions du Product Manager :
 3. Fréquence des retards et impact sur la location suivante.
 4. Nombre de cas problématiques (chevauchements) résolus selon le seuil.
 
+Les deux scopes sont présentés au PM sans trancher à sa place : à 90 min, la
+mesure résout 79 % des cas problématiques pour 2,7 % des locations bloquées sur
+toutes les voitures, et 81 % pour 6,0 % des locations sur Connect seulement.
+
+Le dashboard contient un second onglet **« Estimer un prix »** qui **utilise
+l'API de pricing** (axe 2) : un formulaire de 13 champs construit le JSON
+attendu par `POST /predict`, l'envoie par HTTP (`dashboard/pricing_client.py`,
+`requests.post`, timeout 60 s, erreurs gérées) et affiche le prix, le JSON
+envoyé, le JSON reçu et la commande `curl` équivalente. Un bouton « Réveiller
+l'API » appelle `GET /health`. Le dashboard n'embarque pas le modèle : seule
+l'API le connaît.
+
 Conteneurisé (Docker) et déployé sur HuggingFace Spaces.
 
 ## 5. Axe 2 — Modèle de pricing + tracking MLflow
@@ -76,6 +88,7 @@ Script `notebooks/01_train_pricing.py` :
 `api/main.py` — application **FastAPI** servie par **uvicorn** :
 
 - `GET /` — page d'accueil HTML ;
+- `GET /health` — état de l'API : modèle chargé, type, liste des 13 features ;
 - `GET /docs` — documentation OpenAPI interactive (Swagger UI) ;
 - `POST /predict` — prédiction du prix journalier pour une ou plusieurs voitures.
 
@@ -83,8 +96,13 @@ Format d'entrée imposé par l'énoncé :
 `{"input": [[model_key, mileage, engine_power, fuel, paint_color, car_type,
 private_parking_available, has_gps, has_air_conditioning, automatic_car,
 has_getaround_connect, has_speed_regulator, winter_tires], ...]}`.
-Sortie : `{"prediction": [120.15, ...]}`. Validation via Pydantic (nombre de
-valeurs par ligne, conversion des booléens).
+Sortie : `{"prediction": [120.15, ...]}` (prix arrondis à 2 décimales).
+Validation via Pydantic (nombre de valeurs par ligne, conversion des booléens) ;
+une entrée malformée renvoie une **422** avec un message explicite.
+
+**Tests automatisés (pytest)** : 4 tests sur l'API (`api/test_main.py`, via
+`TestClient` : `/health`, `/predict` simple, batch, 422) et 7 tests sur le
+client HTTP du dashboard (`dashboard/test_pricing_client.py`).
 
 ### Chargement du modèle — décision d'architecture
 
@@ -103,7 +121,7 @@ en **local** au démarrage (`joblib.load`). L'API est donc **autonome** :
 - Images basées sur `python:3.11-slim`, exécutées en utilisateur non-root
   (uid 1000) comme l'exige HF Spaces, exposées sur le port 7860.
 - Déploiement sur **HuggingFace Spaces** (SDK Docker) via `huggingface_hub`
-  (`HfApi().upload_folder`).
+  (`HfApi().upload_folder`), scripté dans `deploy.py` (`python deploy.py`).
 
 ## 8. Stack technique
 
@@ -124,6 +142,8 @@ cd Bloc_5_Getaround
 pip install -r requirements.txt
 
 python notebooks/01_train_pricing.py --n_estimators 200 --max_depth 18   # train + model.joblib
-cd dashboard && streamlit run app.py            # http://localhost:8501
-cd ../api && uvicorn main:app --reload          # http://localhost:8000/docs
+(cd api && pytest -v) && (cd dashboard && pytest -v)                     # 11 tests
+cd api && uvicorn main:app --reload             # http://localhost:8000/docs
+cd ../dashboard && streamlit run app.py         # http://localhost:8501
+python deploy.py                                # pousse les 2 Spaces HuggingFace
 ```

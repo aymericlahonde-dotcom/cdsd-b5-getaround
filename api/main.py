@@ -65,6 +65,7 @@ sur la marketplace Getaround à partir de ses caractéristiques techniques.
 ## Endpoints
 
 * `GET /` — page d'accueil HTML
+* `GET /health` — état de l'API et du modèle chargé
 * `GET /docs` — documentation OpenAPI interactive (Swagger UI)
 * `POST /predict` — prédit le prix journalier pour une ou plusieurs voitures
 
@@ -100,6 +101,14 @@ class PredictionInput(BaseModel):
 
 class PredictionOutput(BaseModel):
     prediction: List[float]
+
+
+class HealthOutput(BaseModel):
+    status: str
+    model_loaded: bool
+    model_type: str
+    n_features: int
+    features: List[str]
 
 
 # ============================================================
@@ -141,6 +150,7 @@ def home() -> str:
         <h2>Endpoints</h2>
         <ul>
             <li><code>GET /</code> — cette page</li>
+            <li><code>GET <a href="/health">/health</a></code> — état de l'API (modèle chargé ?)</li>
             <li><code>GET <a href="/docs">/docs</a></code> — Swagger UI interactive</li>
             <li><code>POST /predict</code> — prédit le prix journalier</li>
         </ul>
@@ -157,6 +167,19 @@ def home() -> str:
     </body>
     </html>
     """
+
+
+@app.get("/health", response_model=HealthOutput, tags=["Root"])
+def health() -> HealthOutput:
+    """Health check : confirme que le modèle est chargé et décrit ses entrées."""
+    regressor = MODEL.named_steps["regressor"]
+    return HealthOutput(
+        status="ok",
+        model_loaded=MODEL is not None,
+        model_type=type(regressor).__name__,
+        n_features=len(FEATURE_NAMES),
+        features=FEATURE_NAMES,
+    )
 
 
 @app.post("/predict", response_model=PredictionOutput, tags=["Predictions"])
@@ -188,4 +211,4 @@ def predict(payload: PredictionInput) -> PredictionOutput:
         df[c] = df[c].astype(int)
 
     preds = MODEL.predict(df)
-    return PredictionOutput(prediction=[float(p) for p in preds])
+    return PredictionOutput(prediction=[round(float(p), 2) for p in preds])

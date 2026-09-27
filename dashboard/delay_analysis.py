@@ -216,7 +216,8 @@ def render(df: pd.DataFrame) -> None:
     st.caption(
         "Trade-off PM : la courbe **turquoise** monte avec le seuil (plus de cas resolus), "
         "la courbe **rose** monte aussi (plus de revenu impacte). "
-        "Le sweet spot est typiquement entre 60 et 120 min sur les Connect cars."
+        "Le seuil resout la majorite des cas des 60-90 min ; comparer les deux scopes "
+        "(toutes les voitures / Connect) avec le bouton de la sidebar."
     )
 
     # ============================================================
@@ -228,7 +229,8 @@ def render(df: pd.DataFrame) -> None:
         f"Avec le seuil **{threshold_min} min** sur **{scope}** : "
         f"{pct_solved:.0f}% des cas problematiques sont resolus, "
         f"pour {pct_revenue_total:.2f}% du revenu impacte. "
-        "La recommandation par defaut est 60-90 min sur Connect uniquement."
+        "Le choix du scope (toutes les voitures ou Connect seulement) est l'arbitrage "
+        "revenu / friction que ce dashboard laisse au Product Manager."
     )
 
     st.markdown("---")

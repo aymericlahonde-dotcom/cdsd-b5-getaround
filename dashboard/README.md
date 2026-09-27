@@ -6,7 +6,7 @@ colorTo: red
 sdk: docker
 app_port: 8501
 pinned: false
-short_description: Analyse retards Getaround et simulation seuil location
+short_description: Analyse retards + estimation prix via API
 ---
 
 # Getaround Delay Analysis Dashboard
@@ -24,12 +24,16 @@ Dashboard Streamlit qui aide l'équipe Product de Getaround à choisir un **seui
    - Nombre de locations affectées
    - Fréquence et impact des retards
    - Cas problématiques résolus
+4. Onglet **Estimer un prix** : formulaire de 13 caractéristiques → `POST /predict`
+   sur l'API FastAPI (Space `getaround-api`) → prix journalier + JSON brut +
+   commande curl équivalente. Bouton « Réveiller l'API » (`GET /health`).
 
 ## Stack
 
 - **Streamlit** — UI dashboard
 - **pandas** + **openpyxl** — manipulation données + lecture Excel
 - **plotly** — visualisations interactives
+- **requests** — appel HTTP de l'API de pricing
 - **Docker** — conteneurisation pour HF Spaces
 
 ## Lien repo source

@@ -20,3 +20,7 @@ pydantic
 
 jupyter
 ipykernel
+
+# Tests (API + client dashboard)
+pytest
+httpx
